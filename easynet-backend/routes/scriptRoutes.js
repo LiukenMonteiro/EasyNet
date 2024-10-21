@@ -92,6 +92,27 @@ router.delete('/delete/:id', authenticateBasic, async (req, res) => {
     }
 });
 
+router.put('/edit/:id', authenticateBasic, async (req, res) => {
+    const { id } = req.params;
+    const { name, content } = req.body;
+
+    try {
+        const updatedScript = await Script.update(
+            { name, content },
+            { where: { id } }
+        );
+
+        if (updatedScript[0] > 0) {
+            res.status(200).json({ message: 'Script atualizado com sucesso.' });
+        } else {
+            res.status(404).json({ message: 'Script não encontrado.' });
+        }
+    } catch (error) {
+        console.error('Erro ao atualizar script:', error);
+        res.status(500).json({ message: 'Erro ao atualizar script' });
+    }
+});
+
 // Rotas adicionais
 router.get('/test', (req, res) => {
     res.send('Rota de teste funcionando!');

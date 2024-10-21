@@ -1,6 +1,6 @@
 // src/components/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom'; // Importando Outlet para renderizar rotas aninhadas
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import styled, { ThemeProvider } from 'styled-components';
 import { GlobalStyle } from '../styles/GlobalStyle';
 import { lightTheme, darkTheme } from '../theme';
@@ -14,6 +14,7 @@ const DashboardContainer = styled.div`
   background-color: ${({ theme }) => theme.body};
   color: ${({ theme }) => theme.text};
   transition: all 0.3s ease-in-out;
+  padding: 0; /* Remover padding para evitar problemas de rolagem */
 `;
 
 const Sidebar = styled.div<{ isOpen: boolean }>`
@@ -23,6 +24,7 @@ const Sidebar = styled.div<{ isOpen: boolean }>`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  height: 100vh; /* Garantir que a sidebar ocupe toda a altura da tela */
   transition: all 0.3s ease-in-out;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
 `;
@@ -53,6 +55,7 @@ const SidebarIcon = styled.div`
 const ContentArea = styled.div`
   flex-grow: 1;
   padding: 20px;
+  overflow-y: auto; /* Permitir rolagem se o conteúdo exceder a altura */
 `;
 
 const Header = styled.div`
@@ -119,7 +122,7 @@ const Dashboard = () => {
               <SidebarItem to="/dashboard/gerenciar-usuarios" active={location.pathname === '/dashboard/gerenciar-usuarios'}>
                 <SidebarIcon><FaUserCog /></SidebarIcon>
                 Gerenciar Usuários
-              </SidebarItem>
+            </SidebarItem>
             </>
           )}
         </Sidebar>

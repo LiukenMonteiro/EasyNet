@@ -12,7 +12,7 @@ export const darkTheme = {
   body: '#333',
   text: '#f5f5f5',
   loginBox: '#444',
-  button: '#1f1f1f',
+  button: '#007bff',
   buttonHover: '#007bff',
   sidebar: '#1a1a1a',
 };

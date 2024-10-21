@@ -1,26 +1,27 @@
+// src/components/ThemeToggle.tsx
 import React from 'react';
 import { FaSun, FaMoon } from 'react-icons/fa';
 import styled from 'styled-components';
 
-const ToggleContainer = styled.button`
-  position: absolute;
-  top: 20px;
-  right: 20px; /* Mover para a direita */
-  background: none;
-  border: none;
+const ToggleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 20px 20px; /* Ajuste a margem conforme necessário */
+`;
+
+const Icon = styled.div<{ isDark: boolean }>`
+  font-size: 1.5rem;
   cursor: pointer;
-  outline: none;
-  transition: transform 0.3s ease;
-  
-  &:hover {
-    transform: scale(1.1); /* Animação ao passar o mouse */
-  }
+  margin-right: 10px; 
+  color: ${({ isDark }) => (isDark ? 'yellow' : 'blue')}; 
 `;
 
 const ThemeToggle = ({ toggleTheme, isDark }: { toggleTheme: () => void; isDark: boolean }) => {
   return (
-    <ToggleContainer onClick={toggleTheme}>
-      {isDark ? <FaSun size={24} /> : <FaMoon size={24} />}
+    <ToggleContainer>
+      <Icon isDark={isDark} onClick={toggleTheme}>
+        {isDark ? <FaSun /> : <FaMoon />}
+      </Icon>
     </ToggleContainer>
   );
 };

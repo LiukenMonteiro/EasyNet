@@ -65,3 +65,26 @@ exports.downloadBackup = async (req, res) => {
         res.status(500).send('Erro ao gerar o backup');
     }
 };
+
+exports.editScript = async (req, res) => {
+    const { id } = req.params;
+    const { name, content } = req.body;
+
+    try {
+        const script = await Script.findByPk(id);
+
+        if (!script) {
+            return res.status(404).json({ message: 'Script não encontrado' });
+        }
+
+        script.name = name;
+        script.content = content;
+
+        await script.save();
+        logger.info(`Script ${id} editado com sucesso`);
+        res.status(200).json(script);
+    } catch (err) {
+        logger.error('Erro ao editar script: ' + err.message);
+        res.status(500).json({ message: 'Erro ao editar script', err });
+    }
+};

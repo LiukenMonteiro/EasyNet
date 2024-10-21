@@ -1,0 +1,25 @@
+# Configuração básica do Arista
+# Definir o nome do dispositivo
+hostname {{DEVICE_NAME}}
+
+# Configurar o endereço IP
+interface {{INTERFACE_NAME}}
+   ip address {{IP_ADDRESS}}/{{SUBNET_MASK}}
+
+# Configurar o gateway
+ip route 0.0.0.0/0 {{DEFAULT_GATEWAY}}
+
+# Configurar DNS
+ip name-server {{DNS_SERVER1}}
+ip name-server {{DNS_SERVER2}}
+
+# Configurar VLAN
+vlan {{VLAN}}
+   name {{DEVICE_NAME}}-VLAN
+
+# Configurar a senha de habilitação
+enable secret {{ENABLE_SECRET}}
+
+# Configurar SNMP
+snmp-server contact "{{CONTATO}}"
+snmp-server location "{{LOCALIZACAO}}"

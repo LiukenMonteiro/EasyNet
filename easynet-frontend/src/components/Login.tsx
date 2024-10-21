@@ -14,6 +14,7 @@ const LoginContainer = styled.div`
   background-color: ${({ theme }) => theme.body};
   color: ${({ theme }) => theme.text};
   transition: all 0.3s ease-in-out;
+  position: relative; /* Para permitir o posicionamento absoluto dos filhos */
 `;
 
 const LoginBox = styled.div`
@@ -41,7 +42,7 @@ const Button = styled.button`
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  
+
   &:hover {
     background-color: ${({ theme }) => theme.buttonHover};
   }
@@ -58,6 +59,13 @@ const TogglePasswordButton = styled.button`
   cursor: pointer;
   color: ${({ theme }) => theme.text};
   margin-left: -30px; /* Ajuste a posição conforme necessário */
+`;
+
+const ThemeToggleWrapper = styled.div`
+  position: absolute;
+  top: 20px; /* Distância do topo */
+  right: 20px; /* Distância da direita */
+  z-index: 10; /* Garante que o botão fique acima de outros elementos */
 `;
 
 const Login = () => {
@@ -107,6 +115,9 @@ const Login = () => {
     <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
       <GlobalStyle />
       <LoginContainer>
+        <ThemeToggleWrapper>
+          <ThemeToggle toggleTheme={toggleTheme} isDark={theme === 'dark'} />
+        </ThemeToggleWrapper>
         <LoginBox>
           <h2>Login</h2>
           <Input 
@@ -129,7 +140,6 @@ const Login = () => {
           {error && <ErrorMessage>{error}</ErrorMessage>}
           <Button onClick={handleLogin}>Entrar</Button>
         </LoginBox>
-        <ThemeToggle toggleTheme={toggleTheme} isDark={theme === 'dark'} />
       </LoginContainer>
     </ThemeProvider>
   );
