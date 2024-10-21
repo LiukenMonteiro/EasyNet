@@ -106,3 +106,7 @@
 {"level":"info","message":"Requisição: POST /api/login"}
 {"level":"info","message":"Requisição: OPTIONS /api/login"}
 {"level":"info","message":"Requisição: POST /api/login"}
+{"level":"info","message":"Requisição: OPTIONS /api/login"}
+{"level":"info","message":"Requisição: POST /api/login"}
+{"level":"info","message":"Requisição: OPTIONS /api/login"}
+{"level":"info","message":"Requisição: POST /api/login"}

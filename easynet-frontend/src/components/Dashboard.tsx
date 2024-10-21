@@ -1,10 +1,13 @@
+// src/components/Dashboard.tsx
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom'; // Importando Outlet para renderizar rotas aninhadas
 import styled, { ThemeProvider } from 'styled-components';
 import { GlobalStyle } from '../styles/GlobalStyle';
 import { lightTheme, darkTheme } from '../theme';
 import ThemeToggle from './ThemeToggle';
 import { FaFileCode, FaListAlt, FaUserCog, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
+
+// Estilização dos componentes (não alterei isso, mas você pode se ajustar conforme necessário)
 
 const DashboardContainer = styled.div`
   display: flex;
@@ -15,9 +18,9 @@ const DashboardContainer = styled.div`
 `;
 
 const Sidebar = styled.div<{ isOpen: boolean }>`
-  width: ${({ isOpen }) => (isOpen ? '250px' : '60px')}; 
+  width: ${({ isOpen }) => (isOpen ? '250px' : '60px')};
   background-color: ${({ theme }) => theme.sidebar};
-  padding: ${({ isOpen }) => (isOpen ? '20px' : '10px')}; 
+  padding: ${({ isOpen }) => (isOpen ? '20px' : '10px')};
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -45,7 +48,7 @@ const SidebarItem = styled(Link)<{ active: boolean }>`
 const SidebarIcon = styled.div`
   margin-right: 10px;
   font-size: 20px;
-  color: ${({ theme }) => theme.icon}; // Define the icon color based on the theme
+  color: ${({ theme }) => theme.icon};
 `;
 
 const ContentArea = styled.div`
@@ -64,9 +67,9 @@ const ToggleButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 2rem; 
-  color: ${({ theme }) => (theme.body === '#333' ? '#00ccff' : theme.button)}; 
-  margin: 20px 0; 
+  font-size: 2rem;
+  color: ${({ theme }) => (theme.body === '#333' ? '#00ccff' : theme.button)};
+  margin: 20px 0;
   transition: transform 0.3s ease;
 
   &:hover {
@@ -76,7 +79,7 @@ const ToggleButton = styled.button`
 
 const Dashboard = () => {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false); 
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -102,7 +105,7 @@ const Dashboard = () => {
       <DashboardContainer>
         <Sidebar isOpen={isSidebarOpen}>
           <ToggleButton onClick={toggleSidebar}>
-            {isSidebarOpen ? <FaAngleLeft /> : <FaAngleRight />} 
+            {isSidebarOpen ? <FaAngleLeft /> : <FaAngleRight />}
           </ToggleButton>
           {isSidebarOpen && (
             <>
@@ -126,7 +129,8 @@ const Dashboard = () => {
             <h2>Dashboard EASYNET</h2>
             <ThemeToggle toggleTheme={toggleTheme} isDark={theme === 'dark'} />
           </Header>
-          {/* Rotas do sistema */}
+          {/* Aqui você renderiza as rotas aninhadas usando o Outlet */}
+          <Outlet />
         </ContentArea>
       </DashboardContainer>
     </ThemeProvider>
