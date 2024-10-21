@@ -10,7 +10,7 @@ const SECRET_KEY = 'sua_chave_secreta';
 router.post('/login', (req, res) => {
     const { username, password } = req.body;
 
-    if (username === 'liuken' && password === '1586') {
+    if (username === 'admin' && password === '1234') {
         const token = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' });
         return res.json({ success: true, token });
     } else {

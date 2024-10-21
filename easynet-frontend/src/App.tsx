@@ -7,6 +7,7 @@ import CriarScript from './components/CriarScript'; // Importando o componente C
 import ListarScripts from './components/ListarScripts'; // Importando outros componentes, se necessário
 import GerenciarUsuarios from './components/GerenciarUsuarios'; // Importando o componente para gerenciar usuários
 
+
 const App = () => {
   return (
     <Router>

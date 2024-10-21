@@ -7,8 +7,7 @@ import { lightTheme, darkTheme } from '../theme';
 import ThemeToggle from './ThemeToggle';
 import { FaFileCode, FaListAlt, FaUserCog, FaAngleLeft, FaAngleRight } from 'react-icons/fa';
 
-// Estilização dos componentes (não alterei isso, mas você pode se ajustar conforme necessário)
-
+// Estilização dos componentes
 const DashboardContainer = styled.div`
   display: flex;
   height: 100vh;
@@ -109,15 +108,15 @@ const Dashboard = () => {
           </ToggleButton>
           {isSidebarOpen && (
             <>
-              <SidebarItem to="/criar-script" active={location.pathname === '/criar-script'}>
+              <SidebarItem to="/dashboard/criar-script" active={location.pathname === '/dashboard/criar-script'}>
                 <SidebarIcon><FaFileCode /></SidebarIcon>
                 Criar Script
               </SidebarItem>
-              <SidebarItem to="/listar-scripts" active={location.pathname === '/listar-scripts'}>
+              <SidebarItem to="/dashboard/listar-scripts" active={location.pathname === '/dashboard/listar-scripts'}>
                 <SidebarIcon><FaListAlt /></SidebarIcon>
                 Listar Scripts
               </SidebarItem>
-              <SidebarItem to="/gerenciar-usuarios" active={location.pathname === '/gerenciar-usuarios'}>
+              <SidebarItem to="/dashboard/gerenciar-usuarios" active={location.pathname === '/dashboard/gerenciar-usuarios'}>
                 <SidebarIcon><FaUserCog /></SidebarIcon>
                 Gerenciar Usuários
               </SidebarItem>
