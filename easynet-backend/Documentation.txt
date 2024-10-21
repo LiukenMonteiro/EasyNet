@@ -1,0 +1,64 @@
+
+## EASYNET - Documentação Técnica
+
+### 1. Introdução
+
+O EASYNET é uma aplicação desenvolvida para automatizar a geração de scripts de configuração para equipamentos de rede, utilizando comandos CLI (Command Line Interface). Além disso, o sistema também realiza o backup automático desses scripts, garantindo sua integridade e segurança.
+
+Principais tecnologias utilizadas no desenvolvimento:
+- **Node.js**: Plataforma JavaScript para o backend.
+- **Express**: Framework para a criação de APIs REST.
+- **Sequelize**: ORM para gerenciar a conexão e as operações no banco de dados MySQL.
+- **MySQL**: Banco de dados relacional.
+
+### 2. Estrutura de Diretórios
+
+A estrutura do projeto está organizada da seguinte forma:
+
+- **config/**: Configurações do banco de dados, como o arquivo `database.js`.
+- **controllers/**: Contém os controladores que gerenciam a lógica das rotas, como `equipmentController.js` e `templateController.js`.
+- **database/**: Arquivos responsáveis pela sincronização e configuração inicial do banco de dados.
+- **logs/**: Funções e arquivos de log, incluindo `logger.js` para monitoramento.
+- **models/**: Definição dos modelos Sequelize, como `Script.js` e `Template.js`.
+- **routes/**: Definição de rotas da API, como `scriptRoutes.js` para gerenciar scripts e backups.
+- **services/**: Serviços auxiliares, como `backupService.js` para agendamento e geração de backups.
+- **templates/**: Modelos de scripts utilizados, como `mikrotik_template.txt`.
+- **utils/**: Funções utilitárias, como `generateScript.js` para a geração de scripts.
+- **validators/**: Arquivos de validação de dados, como `equipmentValidator.js`.
+- **views/**: Arquivos front-end (se aplicável).
+
+### 3. Configuração
+
+O projeto utiliza um arquivo `.env` para configurar variáveis sensíveis, como as credenciais do banco de dados e outras configurações:
+
+Exemplo de arquivo `.env`:
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=sua_senha
+DB_NAME=easynet_db
+```
+
+A configuração do banco de dados é feita no arquivo `config/database.js`, onde o Sequelize é inicializado e conectado ao MySQL.
+
+### 4. Funcionalidades
+
+- **Gerar Script**: A rota `/generate` permite a geração de um script de configuração com base em um template predefinido.
+- **Comparar Scripts**: A rota `/compare` compara dois scripts e retorna as diferenças.
+- **Listar Scripts**: A rota `/list` lista todos os scripts salvos no banco de dados.
+- **Backup Automático**: A rota `/backup/download` gera um backup em PDF dos scripts e disponibiliza para download.
+
+### 5. Monitoramento e Logs
+
+O sistema utiliza o arquivo `logger.js` para gerenciar logs de erros e ações do sistema. Os logs são armazenados em dois arquivos principais:
+
+- **error.log**: Contém logs de erros ocorridos no sistema.
+- **combined.log**: Registra todas as atividades do sistema, incluindo erros e ações de sucesso.
+
+### 6. Testes
+
+Testes foram implementados para garantir a funcionalidade correta do sistema. Um exemplo de teste é o `testGenerateScript.js`, que verifica se a geração de scripts está funcionando conforme o esperado.
+
+### 7. Conclusão
+
+O EASYNET é uma solução robusta e escalável para gerenciar configurações de rede de maneira automatizada. Futuras melhorias incluem a adição de suporte a novos templates de configuração e melhorias na interface de usuário para facilitar o uso do sistema.

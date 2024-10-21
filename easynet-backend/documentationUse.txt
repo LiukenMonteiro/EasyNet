@@ -1,0 +1,195 @@
+
+### 1. Visão Geral
+
+O EASYNET é um sistema que automatiza a geração e comparação de scripts de configuração para equipamentos de rede. Ele facilita a criação, comparação, backup e download de scripts em formato PDF, além de fornecer uma interface para o gerenciamento desses scripts.
+
+### 2. Requisitos
+
+Para rodar o projeto, é necessário:
+
+- Node.js v18.20.4 ou superior
+- MySQL para o banco de dados
+- Ferramenta para testes de API (Insomnia, Postman, etc.)
+- Git para controle de versão (opcional, mas recomendado)
+
+### Dependências do Projeto
+
+O projeto usa as seguintes bibliotecas:
+
+- Express: Framework de servidor web
+- Sequelize: ORM para comunicação com o banco de dados MySQL
+- PDFKit: Para geração de arquivos PDF
+- Winston: Para logs
+- node-cron: Para agendamento de tarefas (backup automático)
+- Nodemon: Para reinicialização automática do servidor durante o desenvolvimento
+
+### 3. Instalação
+
+#### Clonando o Projeto
+
+Primeiro, clone o repositório do projeto:
+
+```bash
+git clone https://github.com/seu-repositorio/easynet.git
+cd easynet
+```
+
+#### Instalando Dependências
+
+Instale as dependências do Node.js:
+
+```bash
+npm install
+```
+
+#### Configurando o Banco de Dados
+
+Crie um banco de dados MySQL com o nome `easynet_db`. Certifique-se de configurar corretamente as variáveis de ambiente no arquivo `.env` ou diretamente no código:
+
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=sua_senha
+DB_NAME=easynet_db
+```
+
+### Rodando o Projeto
+
+Inicie o servidor com o seguinte comando:
+
+```bash
+npm start
+```
+
+### 4. Estrutura de Pastas
+
+```bash
+easynet/
+│
+├── backups/                # Pasta onde os arquivos de backup serão salvos
+├── config/
+│   └── database.js         # Configuração do banco de dados MySQL com Sequelize
+├── controllers/
+│   └── scriptController.js  # Lógica de negócio para as rotas de scripts
+├── models/
+│   └── Script.js           # Definição do modelo Script
+├── routes/
+│   └── scriptRoutes.js     # Definição das rotas da API
+├── utils/
+│   └── generateScript.js   # Função para gerar scripts
+│   └── compareScripts.js   # Função para comparar scripts
+├── logger.js               # Configuração do Winston para logging
+├── app.js                  # Arquivo principal da aplicação
+└── package.json            # Lista de dependências e scripts do projeto
+```
+
+### 5. Configuração
+
+O sistema usa o Sequelize para comunicação com o banco de dados MySQL. Certifique-se de configurar corretamente as variáveis de ambiente para conectar ao banco de dados.
+
+### 6. Endpoints da API
+
+#### POST /generate
+- Descrição: Gera um script com base em um template e campos fornecidos.
+- Body:
+```json
+{
+    "template": "nome_do_template",
+    "fields": {
+        "campo1": "valor1",
+        "campo2": "valor2"
+    }
+}
+```
+- Retorno: Retorna o script gerado.
+
+#### POST /compare
+- Descrição: Compara dois scripts e retorna as diferenças.
+- Body:
+```json
+{
+    "script1": "conteúdo do primeiro script",
+    "script2": "conteúdo do segundo script"
+}
+```
+- Retorno: Retorna um objeto com as diferenças entre os scripts.
+
+#### GET /list
+- Descrição: Lista todos os scripts armazenados no banco de dados.
+- Retorno: Retorna um array de scripts.
+
+#### GET /backup/download
+- Descrição: Gera um PDF contendo o backup dos scripts e o faz download.
+- Retorno: Um arquivo PDF com os scripts de backup.
+
+#### GET /test
+- Descrição: Rota de teste para verificar se o servidor está funcionando corretamente.
+- Retorno: Mensagem de sucesso.
+
+### 7. Exemplo de Uso
+
+#### Geração de Script
+
+Ao enviar uma requisição POST para `/generate` com um template e campos, você receberá um script gerado.
+
+##### Exemplo de requisição:
+```bash
+POST /generate
+{
+  "template": "switch",
+  "fields": {
+    "ip": "192.168.1.1",
+    "hostname": "Switch01"
+  }
+}
+```
+
+##### Exemplo de resposta:
+```json
+{
+  "script": "interface Vlan1
+ ip address 192.168.1.1 255.255.255.0
+ hostname Switch01"
+}
+```
+
+#### Comparação de Scripts
+
+Envie dois scripts para a rota `/compare` e ela retornará as diferenças.
+
+##### Exemplo de requisição:
+```bash
+POST /compare
+{
+  "script1": "interface Vlan1
+ ip address 192.168.1.1 255.255.255.0",
+  "script2": "interface Vlan1
+ ip address 192.168.1.2 255.255.255.0"
+}
+```
+
+##### Exemplo de resposta:
+```json
+{
+  "differences": [
+    {
+      "line": 2,
+      "script1": "192.168.1.1",
+      "script2": "192.168.1.2"
+    }
+  ]
+}
+```
+
+### 8. Logs e Monitoramento
+
+O sistema utiliza Winston para capturar logs de eventos importantes. Eles estão armazenados nos arquivos `error.log` e `combined.log`, além de serem exibidos no console. Isso permite monitorar as ações e erros que ocorrem no servidor.
+
+##### Exemplo de como um erro é registrado:
+```bash
+2024-10-17T15:32:12.345Z - error: Erro ao listar scripts: Database not found
+```
+
+### 9. Conclusão
+
+O EASYNET é uma ferramenta prática para gerar e gerenciar scripts de configuração de rede, automatizando tarefas repetitivas e permitindo a comparação entre scripts para detectar mudanças. Ele também inclui uma funcionalidade de backup automática com geração de PDF, e os logs garantem que o sistema possa ser monitorado e depurado com facilidade.
