@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const logger = require('../logs/logger');
 
-
 exports.createScript = async (req, res) => {
     const { name, content } = req.body;
     try {
@@ -61,7 +60,7 @@ exports.downloadBackup = async (req, res) => {
         logger.info('Backup gerado com sucesso');
     } catch (err) {
         logger.error('Erro ao listar scripts para o backup: ' + err.message);
-        doc.end(); // Certifique-se de finalizar o documento, mesmo em caso de erro
+        doc.end(); 
         res.status(500).send('Erro ao gerar o backup');
     }
 };
@@ -70,17 +69,21 @@ exports.editScript = async (req, res) => {
     const { id } = req.params;
     const { name, content } = req.body;
 
+    console.log(`Tentando editar script com ID: ${id}`); // Log do ID
+
     try {
         const script = await Script.findByPk(id);
+        console.log(`Resultado da busca: ${JSON.stringify(script)}`); // Log do script
 
         if (!script) {
             return res.status(404).json({ message: 'Script não encontrado' });
         }
 
+        // Atualiza os campos do script
         script.name = name;
         script.content = content;
 
-        await script.save();
+        await script.save(); // Salva as alterações
         logger.info(`Script ${id} editado com sucesso`);
         res.status(200).json(script);
     } catch (err) {

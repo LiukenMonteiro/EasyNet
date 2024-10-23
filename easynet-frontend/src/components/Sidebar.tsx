@@ -29,8 +29,6 @@ const SidebarItem = styled(Link)<{ active: boolean }>`
   }
 `;
 
-
-
 const SidebarIcon = styled.div`
   margin-right: 10px;
 `;

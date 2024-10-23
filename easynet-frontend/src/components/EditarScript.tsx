@@ -24,8 +24,8 @@ const Textarea = styled.textarea`
   margin-bottom: 20px;
   resize: none;
   font-family: monospace;
-  background-color: ${({ theme }) => (theme.body === '#f5f5f5' ? '#333' : '#f5f5f5')}; /* Fundo inverso */
-  color: ${({ theme }) => (theme.body === '#f5f5f5' ? '#f5f5f5' : '#333')}; /* Texto inverso */
+  background-color: ${({ theme }) => (theme.body === '#f5f5f5' ? '#333' : '#f5f5f5')};
+  color: ${({ theme }) => (theme.body === '#f5f5f5' ? '#f5f5f5' : '#333')};
   transition: border 0.3s ease;
 
   &:focus {
@@ -64,30 +64,60 @@ const EditarScript = () => {
     }
   }, [location]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChangeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setScript({ ...script, content: e.target.value });
+  };
+
+  const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setScript({ ...script, name: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Aqui você pode adicionar a lógica para atualizar o script no backend
-    // Exemplo: await fetch(`http://localhost:3000/api/scripts/update/${script.id}`, {
-    //   method: 'PUT',
-    //   body: JSON.stringify(script),
-    // });
+    try {
+      const username = 'admin';
+      const password = '1234';
 
-    alert('Script atualizado com sucesso!'); // Substitua pelo feedback real da API
-    navigate('/dashboard/listar-scripts');
+      const response = await fetch(`http://localhost:3000/api/scripts/edit/${script.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Basic ' + btoa(`${username}:${password}`),
+        },
+        body: JSON.stringify({
+          name: script.name,
+          content: script.content,
+        }),
+      });
+
+      if (response.ok) {
+        alert('Script atualizado com sucesso!');
+        navigate('/dashboard/listar-scripts'); // Retorne para a lista de scripts
+      } else {
+        const errorData = await response.json();
+        alert(`Erro ao atualizar script: ${errorData.message}`);
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar script:', error);
+      alert('Erro ao atualizar script');
+    }
   };
 
   return (
     <Container>
       <Title>Editar Script</Title>
       <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={script.name}
+          onChange={handleChangeName}
+          placeholder="Nome do script"
+          required
+        />
         <Textarea
           value={script.content}
-          onChange={handleChange}
+          onChange={handleChangeContent}
           placeholder="Edite o conteúdo do script aqui..."
         />
         <ButtonContainer>

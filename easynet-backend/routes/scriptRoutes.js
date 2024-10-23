@@ -32,9 +32,9 @@ router.post('/generate', authenticateBasic, async (req, res) => {
 
         try {
             const script = generateScript(scriptPath, fields);
-
-            // Tente adicionar o script ao banco de dados
-            const newScript = await Script.create({ name: template, content: script });
+            // console.log(fields)
+            const newScript = await Script.create({ name: fields.NOME, content: script });
+            
 
             return res.status(201).json({ script, storedScript: newScript });
         } catch (error) {
