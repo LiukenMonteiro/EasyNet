@@ -137,16 +137,29 @@ const ListarScripts = () => {
   };
 
 const handleDownload = (script: any) => {
-  const content = script.content || "# Conteúdo não disponível"; // Acesse o conteúdo do script
-  const fileName = `${script.name || "script"}.txt`; // Use o nome do script
+  const content = `
+# Configuração básica do Mikrotik
+/system identity set name=${script.NOME || "Nome não disponível"}
+/ip address add address=${script.IP_ADDRESS || "IP_ADDRESS não disponível"} interface=${script.INTERFACE || "Interface não disponível"}
+/ip route add gateway=${script.GATEWAY || "Gateway não disponível"}
+/system clock set time-zone-name=${script.TIMEZONE || "Timezone não disponível"}
+/interface ethernet set [ find default-name=${script.INTERFACE || "Interface não disponível"} ] name=${script.NOME_INTERFACE || "Interface nome não disponível"}
+/snmp set enabled=yes contact="${script.CONTATO || "Contato não disponível"}" location="${script.LOCALIZACAO || "Localização não disponível"}"
+/ip dns set servers=${script.DNS_SERVER1 || "DNS1 não disponível"},${script.DNS_SERVER2 || "DNS2 não disponível"}
+/interface bridge add name=${script.BRIDGE_NAME || "Bridge não disponível"} comment="Bridge de teste"
+/interface bridge port add bridge=${script.BRIDGE_NAME || "Bridge não disponível"} interface=${script.INTERFACE_BRIDGE || "Interface bridge não disponível"}
+/ip firewall filter add chain=forward action=drop src-address=${script.BLOCKED_IP || "IP bloqueado não disponível"} comment="Bloquear rede indesejada"
+  `;
 
-  // Criação do arquivo para download
+  const fileName = `${script.NOME || "script"}.txt`;
   const blob = new Blob([content], { type: 'text/plain' });
   const link = document.createElement('a');
   link.href = window.URL.createObjectURL(blob);
   link.download = fileName;
   link.click();
 };
+
+  
   
   if (loading) {
     return <LoadingIndicator>Carregando scripts...</LoadingIndicator>;
