@@ -69,11 +69,11 @@ exports.editScript = async (req, res) => {
     const { id } = req.params;
     const { name, content } = req.body;
 
-    console.log(`Tentando editar script com ID: ${id}`); // Log do ID
+    console.log(`Tentando editar script com ID: ${id}`);
 
     try {
         const script = await Script.findByPk(id);
-        console.log(`Resultado da busca: ${JSON.stringify(script)}`); // Log do script
+        console.log(`Resultado da busca: ${JSON.stringify(script)}`);
 
         if (!script) {
             return res.status(404).json({ message: 'Script não encontrado' });

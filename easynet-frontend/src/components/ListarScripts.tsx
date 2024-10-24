@@ -1,4 +1,4 @@
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaDownload } from 'react-icons/fa';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
@@ -44,6 +44,14 @@ const DeleteButton = styled(IconButton)`
   }
 `;
 
+const DownloadButton = styled(IconButton)`
+  color: #007bff;
+
+  &:hover {
+    color: #0056b3;
+  }
+`;
+
 const LoadingIndicator = styled.div`
   font-size: 1.5rem;
   text-align: center;
@@ -85,7 +93,7 @@ const ListarScripts = () => {
 
   useEffect(() => {
     fetchScripts();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const handleRefresh = () => {
@@ -128,6 +136,43 @@ const ListarScripts = () => {
     }
   };
 
+  const handleDownload = (script: any) => {
+    const content = `
+# Configuração básica do Mikrotik
+# Definir o nome do roteador
+/system identity set name=${script.name} 
+
+# Configurar o endereço IP
+/ip address add address=${script.ip_address} interface=${script.interface}
+
+# Configurar o gateway
+/ip route add gateway=${script.gateway}
+
+/system clock set time-zone-name=${script.timezone}
+
+/interface ethernet set [ find default-name=${script.interface} ] name=${script.nome_interface}
+
+/snmp set enabled=yes contact="${script.contato}" location="${script.localizacao}"
+
+/ip dns set servers=${script.dns_server1},${script.dns_server2}
+
+/interface bridge add name=${script.bridge_name} comment="Bridge de teste"
+/interface bridge port add bridge=${script.bridge_name} interface=${script.interface_bridge}
+
+/ip firewall filter add chain=forward action=drop src-address=${script.blocked_ip} comment="Bloquear rede indesejada"
+`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${script.name}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return <LoadingIndicator>Carregando scripts...</LoadingIndicator>;
   }
@@ -142,6 +187,9 @@ const ListarScripts = () => {
             <IconButton onClick={() => handleEdit(script)}>
               <FaEdit />
             </IconButton>
+            <DownloadButton onClick={() => handleDownload(script)}>
+              <FaDownload />
+            </DownloadButton>
             <DeleteButton onClick={() => handleDelete(script.id)}>
               <FaTrashAlt />
             </DeleteButton>

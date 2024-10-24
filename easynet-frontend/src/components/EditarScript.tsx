@@ -20,7 +20,7 @@ const Textarea = styled.textarea`
   height: 300px;
   padding: 10px;
   border-radius: 4px;
-  border: 1px solid #ccc;
+  border: 1px solid #007bff; /* Borda azul */
   margin-bottom: 20px;
   resize: none;
   font-family: monospace;
@@ -29,7 +29,21 @@ const Textarea = styled.textarea`
   transition: border 0.3s ease;
 
   &:focus {
-    border-color: #007bff;
+    border-color: #0056b3; /* Borda azul mais escura em foco */
+    outline: none;
+  }
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #007bff; /* Borda azul */
+  margin-bottom: 20px;
+  font-size: 1rem;
+
+  &:focus {
+    border-color: #0056b3; /* Borda azul mais escura em foco */
     outline: none;
   }
 `;
@@ -108,7 +122,7 @@ const EditarScript = () => {
     <Container>
       <Title>Editar Script</Title>
       <form onSubmit={handleSubmit}>
-        <input
+        <Input
           type="text"
           value={script.name}
           onChange={handleChangeName}
