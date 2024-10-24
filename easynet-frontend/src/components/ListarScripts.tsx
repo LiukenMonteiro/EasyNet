@@ -136,43 +136,18 @@ const ListarScripts = () => {
     }
   };
 
-  const handleDownload = (script: any) => {
-    const content = `
-# Configuração básica do Mikrotik
-# Definir o nome do roteador
-/system identity set name=${script.name} 
+const handleDownload = (script: any) => {
+  const content = script.content || "# Conteúdo não disponível"; // Acesse o conteúdo do script
+  const fileName = `${script.name || "script"}.txt`; // Use o nome do script
 
-# Configurar o endereço IP
-/ip address add address=${script.ip_address} interface=${script.interface}
-
-# Configurar o gateway
-/ip route add gateway=${script.gateway}
-
-/system clock set time-zone-name=${script.timezone}
-
-/interface ethernet set [ find default-name=${script.interface} ] name=${script.nome_interface}
-
-/snmp set enabled=yes contact="${script.contato}" location="${script.localizacao}"
-
-/ip dns set servers=${script.dns_server1},${script.dns_server2}
-
-/interface bridge add name=${script.bridge_name} comment="Bridge de teste"
-/interface bridge port add bridge=${script.bridge_name} interface=${script.interface_bridge}
-
-/ip firewall filter add chain=forward action=drop src-address=${script.blocked_ip} comment="Bloquear rede indesejada"
-`;
-
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${script.name}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
+  // Criação do arquivo para download
+  const blob = new Blob([content], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = window.URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+};
+  
   if (loading) {
     return <LoadingIndicator>Carregando scripts...</LoadingIndicator>;
   }
@@ -181,21 +156,22 @@ const ListarScripts = () => {
     <Container>
       <h2>Scripts Salvos</h2>
       {scripts.map((script) => (
-        <ScriptItem key={script.id}>
-          <span>{script.name}</span>
-          <div>
-            <IconButton onClick={() => handleEdit(script)}>
-              <FaEdit />
-            </IconButton>
-            <DownloadButton onClick={() => handleDownload(script)}>
-              <FaDownload />
-            </DownloadButton>
-            <DeleteButton onClick={() => handleDelete(script.id)}>
-              <FaTrashAlt />
-            </DeleteButton>
-          </div>
-        </ScriptItem>
-      ))}
+  <ScriptItem key={script.id}>
+    <span>{script.NOME || script.name || "Nome não disponível"}</span> {/* Verifica as opções de nome */}
+    <div>
+      <IconButton onClick={() => handleEdit(script)}>
+        <FaEdit />
+      </IconButton>
+      <DownloadButton onClick={() => handleDownload(script)}>
+        <FaDownload />
+      </DownloadButton>
+      <DeleteButton onClick={() => handleDelete(script.id)}>
+        <FaTrashAlt />
+      </DeleteButton>
+    </div>
+  </ScriptItem>
+))}
+
     </Container>
   );
 };
