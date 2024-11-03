@@ -9,6 +9,7 @@ const cron = require('node-cron');
 const backupService = require('./services/backupService');
 const winston = require('winston');
 const cors = require('cors');
+// const bodyParser = require('body-parser');
 
 // Configuração do logger
 const logger = winston.createLogger({
@@ -21,17 +22,35 @@ const logger = winston.createLogger({
     ]
 });
 
+// app.use(bodyParser.json());
 // Middleware para tratamento de erros
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
+
+app.get('/api/templates/:name', (req, res) => {
+    const templateName = req.params.name;
+    const filePath = path.join(__dirname, 'templates', `${templateName}.txt`);
+    
+    fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+        console.error('Erro ao ler o template:', err);
+        return res.status(404).json({ error: 'Template não encontrado' });
+      }
+      res.json({ content: data });
+    });
+  });
+  
+app.use((req, res, next) => {
+    logger.info(`Requisição: ${req.method} ${req.originalUrl}`);
+    next();
+});
+
 app.use((err, req, res, next) => {
     logger.error('Erro não tratado: ' + err.message);
     res.status(500).json({ message: 'Erro interno no servidor' });
 });
 
 // Middleware para log de requisições
-app.use((req, res, next) => {
-    logger.info(`Requisição: ${req.method} ${req.originalUrl}`);
-    next();
-});
 
 // Executar o backup diariamente às 2h da manhã
 cron.schedule('0 2 * * *', () => {
@@ -40,7 +59,6 @@ cron.schedule('0 2 * * *', () => {
 });
 
 // Middleware para analisar JSON
-app.use(express.json());
 
 // Configuração do CORS
 app.use(cors());

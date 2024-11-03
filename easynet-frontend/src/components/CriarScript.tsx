@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { templates } from './templates'; // Importa os templates do arquivo templates.js
+import { addScript } from '../utils/storage'; // importa a função addScript
+import { v4 as uuidv4 } from 'uuid'; // Gera IDs únicos
+
 
 const Container = styled.div`
   width: 300px; /* Largura menor para destacar o container */
@@ -23,46 +25,32 @@ const Form = styled.form`
   flex-direction: column; /* Colocar todos os elementos em coluna */
 `;
 
-const Input = styled.input`
-  width: 100%; /* Largura total do container */
-  padding: 8px;  
-  margin: 8px 0; 
-  border: 1px solid #007bff; /* Borda azul padrão */
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  border: 1px solid #007bff;
   border-radius: 4px;
-  font-size: 0.9rem; 
+  font-size: 0.9rem;
 
   &:focus {
-    border-color: #0056b3; /* Borda azul mais escura ao focar */
+    border-color: #0056b3;
     outline: none;
   }
 `;
 
 const Button = styled.button`
   width: 100%; /* Largura total do container */
-  padding: 8px; 
+  padding: 8px;
   background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem; 
+  font-size: 0.9rem;
 
   &:hover {
     background-color: #0056b3;
-  }
-`;
-
-const Select = styled.select`
-  width: 100%; /* Largura total do container */
-  padding: 8px; 
-  margin: 8px 0; 
-  border: 1px solid #007bff; /* Borda azul para o seletor */
-  border-radius: 4px;
-  font-size: 0.9rem; 
-
-  &:focus {
-    border-color: #0056b3; /* Borda azul mais escura ao focar */
-    outline: none;
   }
 `;
 
@@ -93,7 +81,7 @@ const FileInputWrapper = styled.div`
 
 const ImportButton = styled.button`
   width: 100%; /* Largura total do container */
-  padding: 8px; 
+  padding: 8px;
   margin-top: 8px; /* Espaçamento acima do botão de importação */
   background-color: #007bff; /* Azul */
   color: white;
@@ -108,113 +96,45 @@ const ImportButton = styled.button`
 `;
 
 const CriarScript = () => {
-  const [selectedTemplate, setSelectedTemplate] = useState('');
   const [fields, setFields] = useState<any>({});
   const [message, setMessage] = useState('');
 
-  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const template = e.target.value as keyof typeof templates;
-    setSelectedTemplate(template);
-    setFields(templates[template] || {});
-  };
-
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFields((prevFields: any) => ({
-      ...prevFields,
-      [name]: value,
-    }));
-    console.log(fields);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const importedScript = event.target?.result as string;
-        
-        try {
-          const data = JSON.parse(importedScript); 
-          setFields(data);
-          
-        } catch (error) {
-          console.error('Erro ao importar o script:', error);
-          alert('Erro ao importar o script. Verifique o formato do arquivo.');
-        }
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(fields);
+    
+    const newScript = {
+      id: uuidv4(), // ID único
+      name: fields.name || 'Script sem nome',
+      content: fields.script,
+    };
 
-    const response = await fetch('http://localhost:3000/api/scripts/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Basic ' + btoa('admin:1234'), // Substitua pelas credenciais corretas
-      },
-      body: JSON.stringify({
-        template: selectedTemplate,
-        fields,
-      }),
-    });
+    addScript(newScript); // salva no localStorage
 
-    const data = await response.json();
+    setMessage('Script salvo com sucesso!');
+    setTimeout(() => setMessage(''), 3000);
 
-    if (!response.ok) {
-      console.error(data.message);
-      alert(data.message);
-    } else {
-      setMessage('Script gerado com sucesso!');
-      console.log('Script gerado:', data.script);
-      setTimeout(() => {
-        setMessage('');
-      }, 3000);
-    }
+    setFields({}); // limpa os campos após salvar
   };
 
   return (
     <Container>
       <Title>Criar Script</Title>
       <Form onSubmit={handleSubmit}>
-        <Select value={selectedTemplate} onChange={handleTemplateChange} required>
-          <option value="">Selecione o Template</option>
-          <option value="mikrotik">Mikrotik</option>
-          <option value="cisco">Cisco</option>
-          <option value="ubiquiti">Ubiquiti</option>
-          <option value="arista">Arista</option>
-          <option value="juniper">Juniper</option>
-        </Select>
-
-        {selectedTemplate &&
-          Object.keys(fields).map((fieldKey) => (
-            <Input
-              key={fieldKey}
-              name={fieldKey}
-              value={fields[fieldKey]}
-              placeholder={fieldKey}
-              onChange={handleFieldChange}
-              required
-            />
-          ))}
-
-        <FileInputWrapper>
-          <FileInput 
-            type="file" 
-            accept=".txt" 
-            onChange={handleFileChange} 
-            id="fileInput" 
-          />
-          <ImportButton onClick={() => document.getElementById('fileInput')?.click()}>
-            Importar Script
-          </ImportButton>
-        </FileInputWrapper>
-
-        <Button type="submit">Gerar Script</Button>
+        <input
+          type="text"
+          placeholder="Nome do script"
+          value={fields.name || ""}
+          onChange={(e) => setFields({ ...fields, name: e.target.value })}
+          required
+        />
+        <TextArea
+          rows={10}
+          placeholder="Digite o seu script aqui..."
+          value={fields.script || ""}
+          onChange={(e) => setFields({ ...fields, script: e.target.value })}
+          required
+        />
+        <Button type="submit">Salvar Script</Button>
       </Form>
       <Popup visible={message !== ''}>{message}</Popup>
     </Container>

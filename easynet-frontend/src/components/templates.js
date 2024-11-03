@@ -16,7 +16,7 @@ export const templates = {
       BLOCKED_IP: '',
     },
     cisco: {
-      DEVICE_NAME: '',
+      NAME: '',
       IP_ADDRESS: '',
       SUBNET_MASK: '',
       DEFAULT_GATEWAY: '',

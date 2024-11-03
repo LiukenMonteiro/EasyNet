@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { updateScript } from '../utils/storage';
 
 const Container = styled.div`
   padding: 20px;
@@ -70,75 +71,27 @@ const Button = styled.button`
 const EditarScript = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [script, setScript] = useState<any>({ name: '', content: '' });
+  const [script, setScript] = useState<any>(location.state?.script || {});
 
-  useEffect(() => {
-    if (location.state && location.state.script) {
-      setScript(location.state.script);
-    }
-  }, [location]);
-
-  const handleChangeContent = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setScript({ ...script, content: e.target.value });
-  };
-
-  const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setScript({ ...script, name: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    try {
-      const username = 'admin';
-      const password = '1234';
-
-      const response = await fetch(`http://localhost:3000/api/scripts/edit/${script.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Basic ' + btoa(`${username}:${password}`),
-        },
-        body: JSON.stringify({
-          name: script.name,
-          content: script.content,
-        }),
-      });
-
-      if (response.ok) {
-        alert('Script atualizado com sucesso!');
-        navigate('/dashboard/listar-scripts'); // Retorne para a lista de scripts
-      } else {
-        const errorData = await response.json();
-        alert(`Erro ao atualizar script: ${errorData.message}`);
-      }
-    } catch (error) {
-      console.error('Erro ao atualizar script:', error);
-      alert('Erro ao atualizar script');
-    }
+  const handleSave = () => {
+    updateScript(script); // Atualiza o script no localStorage
+    alert('Script atualizado com sucesso!');
+    navigate('/dashboard/listar-scripts');
   };
 
   return (
     <Container>
-      <Title>Editar Script</Title>
-      <form onSubmit={handleSubmit}>
-        <Input
-          type="text"
-          value={script.name}
-          onChange={handleChangeName}
-          placeholder="Nome do script"
-          required
-        />
-        <Textarea
-          value={script.content}
-          onChange={handleChangeContent}
-          placeholder="Edite o conteúdo do script aqui..."
-        />
-        <ButtonContainer>
-          <Button type="submit">Salvar</Button>
-          <Button onClick={() => navigate('/dashboard/listar-scripts')}>Cancelar</Button>
-        </ButtonContainer>
-      </form>
+      <h2>Editar Script</h2>
+      <input
+        type="text"
+        value={script.name}
+        onChange={(e) => setScript({ ...script, name: e.target.value })}
+      />
+      <textarea
+        value={script.content}
+        onChange={(e) => setScript({ ...script, content: e.target.value })}
+      />
+      <button onClick={handleSave}>Salvar</button>
     </Container>
   );
 };

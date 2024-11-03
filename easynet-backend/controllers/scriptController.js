@@ -5,16 +5,23 @@ const path = require('path');
 const logger = require('../logs/logger');
 
 exports.createScript = async (req, res) => {
+    console.log('Corpo da requisição:', req.body);
     const { name, content } = req.body;
+
+    if (!name || !content) {
+        return res.status(400).json({ message: 'Nome e conteúdo são obrigatórios.' });
+    } 
+
     try {
         const newScript = await Script.create({ name, content });
         logger.info('Script criado com sucesso');
         res.status(201).json(newScript);
-    } catch (err) {
-        logger.error('Erro ao criar script: ' + err.message);
+    }catch (err) {
+        logger.error('Erro ao criar script: ', err); // Log detalhado
         res.status(500).json({ message: 'Erro ao criar script', err });
     }
 };
+
 
 exports.listScripts = async (req, res) => {
     try {

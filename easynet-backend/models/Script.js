@@ -4,11 +4,11 @@ const sequelize = require('../config/database');
 const Script = sequelize.define('Script', {
     name: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     content: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: false,
     },
     createdAt: {
         type: DataTypes.DATE,
