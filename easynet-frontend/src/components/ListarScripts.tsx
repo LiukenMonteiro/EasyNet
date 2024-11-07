@@ -1,12 +1,15 @@
-import { FaEdit, FaTrashAlt, FaWifi, FaCloud, FaPlug, FaNetworkWired, FaSatelliteDish, FaRegHandshake } from 'react-icons/fa';
-import { MdRouter } from 'react-icons/md'; // ícone de roteador
-import { IoIosCloud } from 'react-icons/io'; // ícone de nuvem
-import { GiNetworkBars, GiElectric, GiCircuitry } from 'react-icons/gi'; // Ícones para diferentes marcas
-import { RiRouterFill } from 'react-icons/ri'; // Outro ícone de roteador
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { getScripts, deleteScript } from '../utils/storage';
 import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
+import { FaEdit, FaTrashAlt, FaDownload, FaRegHandshake } from 'react-icons/fa';
+import { ReactComponent as CiscoIcon } from '../svg/cisco.svg';
+import { ReactComponent as UbiquitiIcon } from '../svg/ubiquiti.svg';
+import { ReactComponent as MikrotikIcon } from '../svg/mk.svg';
+import { ReactComponent as HuaweiIcon } from '../svg/huwawi.svg';
+import { ReactComponent as JuniperIcon } from '../svg/network.svg';
+import { ReactComponent as FortinetIcon } from '../svg/network.svg';
 
 interface Script {
   id: string;
@@ -23,40 +26,151 @@ const Container = styled.div`
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   width: 100%;
-  max-width: 600px;
+  max-width: 1000px;
   margin: 20px auto;
 
-  @media (max-width: 480px) {
+  @media (max-width: 768px) {
     padding: 15px;
   }
-`;
 
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 20px;
-  border: 1px solid #007bff;
-  border-radius: 4px;
-  font-size: 0.9rem;
-
-  &:focus {
-    border-color: #0056b3;
-    outline: none;
+  @media (max-width: 480px) {
+    padding: 10px;
   }
 `;
 
-const ScriptGroup = styled.div`
+const SearchContainer = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px;
+`;
+
+const SearchIcon = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #007bff;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+`;
+
+const SearchInput = styled.input<{ isVisible: boolean }>`
+  width: ${({ isVisible }) => (isVisible ? '100%' : '0')};
+  padding: ${({ isVisible }) => (isVisible ? '8px 16px' : '0')};
+  border: 2px solid #007bff;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  opacity: ${({ isVisible }) => (isVisible ? '1' : '0')};
+  visibility: ${({ isVisible }) => (isVisible ? 'visible' : 'hidden')};
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+  }
+`;
+
+const MarcaGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+`;
+
+const MarcaCard = styled.div<{ isActive: boolean }>`
+  padding: 20px;
+  background-color: ${({ theme, isActive }) =>
+    isActive ? 'rgba(0, 123, 255, 0.3)' : theme.body === '#ffffff' ? '#000' : '#444'};
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 150px;
+  box-shadow: ${({ isActive }) => (isActive ? '0 4px 15px rgba(0, 123, 255, 0.5)' : '0 4px 8px rgba(0, 0, 0, 0.1)')};
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
+  }
+
+  ${({ isActive }) =>
+    isActive &&
+    `
+      transform: translateY(-5px);
+      box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
+    `}
+`;
+
+const MarcaTitle = styled.h3`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  position: relative;
+  color: ${({ theme }) => theme.body === '#ffffff' ? '#fff' : '#000'};
+
+  div:first-child {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding-top: 2px;
+
+    svg {
+      width: 50px;
+      height: 50px;
+      margin-top: -8px;
+    }
+  }
+
+  div:last-child {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    font-size: 1rem;
+
+    span {
+      color: #007bff;
+    }
+  }
+`;
+
+const ScriptList = styled.div`
   margin-top: 20px;
 `;
 
 const ScriptItem = styled.div`
   padding: 10px;
   margin: 5px 0;
-  border: 1px solid #007bff;
   border-radius: 4px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: ${({ theme }) => theme.body === '#ffffff' ? '#000' : '#333'};
+  color: ${({ theme }) => theme.body === '#ffffff' ? '#fff' : '#000'};
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 123, 255, 0.6);
+  }
 `;
 
 const ScriptName = styled.span`
@@ -64,6 +178,7 @@ const ScriptName = styled.span`
   margin-right: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: ${({ theme }) => theme.body === '#ffffff' ? '#000' : '#fff'};
 `;
 
 const IconContainer = styled.div`
@@ -94,6 +209,22 @@ const DeleteButton = styled(IconButton)`
   }
 `;
 
+const EditButton = styled(IconButton)`
+  color: blue;
+
+  &:hover {
+    color: darkblue;
+  }
+`;
+
+const DownloadButton = styled(IconButton)`
+  color: blue;
+
+  &:hover {
+    color: darkblue;
+  }
+`;
+
 const LoadingIndicator = styled.div`
   font-size: 1.2rem;
   text-align: center;
@@ -104,13 +235,32 @@ const LoadingIndicator = styled.div`
 const ListarScripts = () => {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [expandedMarcas, setExpandedMarcas] = useState<Set<string>>(new Set());
+  const [expandedMarca, setExpandedMarca] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const navigate = useNavigate();
+  const theme = useTheme();
+
+  const normalizeString = (str: string) => str.toLowerCase().trim();
+
+  const iconMap: Record<string, JSX.Element> = {
+    mikrotik: <MikrotikIcon />,
+    huawei: <HuaweiIcon />,
+    ubiquiti: <UbiquitiIcon />,
+    cisco: <CiscoIcon />,
+    juniper: <JuniperIcon />,
+    fortinet: <FortinetIcon />,
+  };
 
   useEffect(() => {
     const loadedScripts = getScripts() as Script[];
-    setScripts(loadedScripts.sort((a, b) => b.id.localeCompare(a.id))); // Ordena do mais recente ao mais antigo
+    const normalizedScripts = loadedScripts
+      .sort((a, b) => b.id.localeCompare(a.id))
+      .map(script => ({
+        ...script,
+        marca: normalizeString(script.marca)
+      }));
+    setScripts(normalizedScripts);
     setLoading(false);
   }, []);
 
@@ -124,90 +274,120 @@ const ListarScripts = () => {
   };
 
   const handleToggleMarca = (marca: string) => {
-    const newExpandedMarcas = new Set(expandedMarcas);
-    if (newExpandedMarcas.has(marca)) {
-      newExpandedMarcas.delete(marca);
-    } else {
-      newExpandedMarcas.add(marca);
+    setExpandedMarca(prevMarca => (prevMarca === marca ? null : marca));
+  };
+
+  const getMarcaIcon = (marca: string) => {
+    const normalizedMarca = normalizeString(marca);
+    const icon = iconMap[normalizedMarca] || <FaRegHandshake />;
+    const iconColor = getIconColor();
+
+    return React.cloneElement(icon, {
+      style: { fill: iconColor },
+    });
+  };
+
+  const getIconColor = () => {
+    return theme.body === '#ffffff' ? '#000000' : '#ffffff';
+  };
+
+  const downloadScript = (script: Script) => {
+    const element = document.createElement('a');
+    const file = new Blob([script.content], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = `${script.name}.txt`;
+    document.body.appendChild(element);
+    element.click();
+  };
+
+  const toggleSearch = () => {
+    setIsSearchVisible(!isSearchVisible);
+    if (!isSearchVisible) {
+      setTimeout(() => {
+        document.querySelector('input')?.focus();
+      }, 100);
     }
-    setExpandedMarcas(newExpandedMarcas);
   };
 
-  // Mapa para ícones das marcas
-  const iconMap: Record<string, JSX.Element> = {
-    mikrotik: <GiNetworkBars />,
-    huawei: <IoIosCloud />,
-    ubiquiti: <FaSatelliteDish />,
-    cisco: <MdRouter />,
-    juniper: <FaNetworkWired />,
-    arista: <GiElectric />,
-    fortinet: <GiCircuitry />,
-    intelbras: <GiNetworkBars />,
-    mikrotik3: <RiRouterFill />,
-  };
-
-  const getMarcaIcon = (marca: string) => iconMap[marca.toLowerCase()] || <FaRegHandshake />;
-
-  const filteredScripts = scripts.filter(script =>
-    script.marca && script.marca.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredScripts = scripts.filter((script) =>
+    normalizeString(script.name).includes(normalizeString(searchTerm))
   );
 
-  const groupedScripts = filteredScripts.reduce<Record<string, Script[]>>((groups, script) => {
-    const marca = script.marca.toLowerCase(); 
-    if (!groups[marca]) groups[marca] = [];
-    groups[marca].push(script);
-    return groups;
+  const groupedScripts = filteredScripts.reduce((acc: Record<string, Script[]>, script) => {
+    const normalizedMarca = normalizeString(script.marca);
+    (acc[normalizedMarca] = acc[normalizedMarca] || []).push(script);
+    return acc;
   }, {});
 
   return (
     <Container>
-      <h2>Scripts Salvos</h2>
-      <SearchInput
-        type="text"
-        placeholder="Buscar por marca..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        aria-label="Buscar por marca"
-      />
+      <SearchContainer>
+        <SearchIcon onClick={toggleSearch}>
+          <Search size={24} />
+        </SearchIcon>
+        <SearchInput
+          type="text"
+          placeholder="Buscar por script"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          isVisible={isSearchVisible}
+        />
+      </SearchContainer>
 
       {loading ? (
         <LoadingIndicator>Carregando scripts...</LoadingIndicator>
-      ) : Object.keys(groupedScripts).length === 0 ? (
-        <LoadingIndicator>Nenhum script encontrado.</LoadingIndicator>
       ) : (
-        Object.entries(groupedScripts).map(([marca, scripts]) => (
-          <ScriptGroup key={marca}>
-            <h3 
-              onClick={() => handleToggleMarca(marca)} 
-              style={{ cursor: 'pointer', color: '#007bff' }}
-              aria-label={`Toggle scripts da marca ${marca}`}
-            >
-              {getMarcaIcon(marca)} {/* Exibe o ícone da marca */}
-              {marca}
-            </h3>
-            {expandedMarcas.has(marca) && (
-              scripts.map((script) => (
-                <ScriptItem key={script.id}>
-                  <ScriptName>{script.name}</ScriptName>
-                  <IconContainer>
-                    <IconButton
-                      onClick={() => navigate('/dashboard/editar-script', { state: { script } })}
-                      aria-label={`Editar script ${script.name}`}
-                    >
-                      <FaEdit />
-                    </IconButton>
-                    <DeleteButton
-                      onClick={() => handleDelete(script.id)}
-                      aria-label={`Excluir script ${script.name}`}
-                    >
-                      <FaTrashAlt />
-                    </DeleteButton>
-                  </IconContainer>
-                </ScriptItem>
-              ))
-            )}
-          </ScriptGroup>
-        ))
+        <>
+          {filteredScripts.length === 0 ? (
+            <LoadingIndicator>Nenhum script para ser exibido</LoadingIndicator>
+          ) : (
+            <>
+              <MarcaGrid>
+                {Object.keys(groupedScripts).map((marca) => (
+                  <MarcaCard
+                    key={marca}
+                    isActive={expandedMarca === marca}
+                    onClick={() => handleToggleMarca(marca)}
+                  >
+                    <MarcaTitle>
+                      <div>{getMarcaIcon(marca)}</div>
+                      <div>
+                        {marca.charAt(0).toUpperCase() + marca.slice(1)} <span>({groupedScripts[marca].length})</span>
+                      </div>
+                    </MarcaTitle>
+                  </MarcaCard>
+                ))}
+              </MarcaGrid>
+
+              <ScriptList>
+                {Object.entries(groupedScripts).map(([marca, scripts]) => (
+                  <div key={marca}>
+                    {expandedMarca === marca && (
+                      <>
+                        {scripts.map((script) => (
+                          <ScriptItem key={script.id}>
+                            <ScriptName>{script.name}</ScriptName>
+                            <DownloadButton onClick={() => downloadScript(script)}>
+                              <FaDownload />
+                            </DownloadButton>
+                            <IconContainer>
+                              <EditButton onClick={() => navigate('/dashboard/editar-script', { state: { script } })}>
+                                <FaEdit />
+                              </EditButton>
+                              <DeleteButton onClick={() => handleDelete(script.id)}>
+                                <FaTrashAlt />
+                              </DeleteButton>
+                            </IconContainer>
+                          </ScriptItem>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                ))}
+              </ScriptList>
+            </>
+          )}
+        </>
       )}
     </Container>
   );

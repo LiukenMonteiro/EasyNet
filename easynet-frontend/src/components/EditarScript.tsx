@@ -6,7 +6,7 @@ import { updateScript } from '../utils/storage';
 interface Script {
   id: string;
   name: string;
-  brand: string;
+  marca: string;
   content: string;
   portas: string[];
 }
@@ -103,14 +103,36 @@ const Popup = styled.div<{ visible: boolean }>`
   transition: opacity 0.5s ease;
 `;
 
+const ScriptContent = styled.div`
+  margin: 8px 0;
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+`;
+
 const EditarScript = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [script, setScript] = useState<Script>(
-    (location.state?.script as Script) || { id: '', name: '', brand: '', content: '', portas: [] }
-  );
+  const [script, setScript] = useState<Script>({
+    id: '',
+    name: '',
+    marca: '',
+    content: '',
+    portas: []
+  });
   const [parts, setParts] = useState<ScriptPart[]>([]);
   const [message, setMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const scriptFromLocation = location.state?.script as Script;
+    if (scriptFromLocation) {
+      setScript(scriptFromLocation);
+    } else {
+      // Redirecionar para a lista se não houver script para editar
+      navigate('/dashboard/listar-scripts');
+    }
+  }, [location.state, navigate]);
 
   useEffect(() => {
     if (script.content) {
@@ -157,29 +179,47 @@ const EditarScript = () => {
     );
   };
 
-  const handleSave = () => {
-    const updatedContent = parts
-      .map(part => {
-        if (part.isEditable) {
-          return part.isSelect
-            ? `**[${part.value}]**`
-            : `***${part.value}***`;
-        }
-        return part.value;
-      })
-      .join('');
+  const handleSave = async () => {
+    try {
+      setIsLoading(true);
 
-    const updatedScript: Script = {
-      ...script,
-      content: updatedContent,
-    };
+      const updatedContent = parts
+        .map(part => {
+          if (part.isEditable) {
+            return part.isSelect
+              ? `**[${part.value}]**`
+              : `***${part.value}***`;
+          }
+          return part.value;
+        })
+        .join('');
 
-    updateScript(updatedScript);
-    setMessage('Script atualizado com sucesso!');
-    setTimeout(() => {
-      setMessage('');
-      navigate('/dashboard/listar-scripts');
-    }, 2000);
+      // Extrair portas do conteúdo atualizado
+      const portasMatch = updatedContent.match(/\*\*\[(.*?)\]\*\*/);
+      const portas = portasMatch
+        ? portasMatch[1].split(',').map(porta => porta.trim()).filter(Boolean)
+        : [];
+
+      const updatedScript: Script = {
+        ...script,
+        content: updatedContent,
+        portas
+      };
+
+      await updateScript(updatedScript);
+      setMessage('Script atualizado com sucesso!');
+      
+      // Aguardar um pouco para mostrar a mensagem antes de redirecionar
+      setTimeout(() => {
+        setMessage('');
+        navigate('/dashboard/listar-scripts');
+      }, 2000);
+    } catch (error) {
+      setMessage('Erro ao atualizar o script. Tente novamente.');
+      console.error('Erro ao salvar script:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -188,45 +228,49 @@ const EditarScript = () => {
       <Form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
         <Input
           type="text"
-          value={script.brand || ''}
-          onChange={(e) => setScript({ ...script, brand: e.target.value })}
+          value={script.marca}
+          onChange={(e) => setScript({ ...script, marca: e.target.value })}
           placeholder="Marca do script"
           required
         />
         <Input
           type="text"
-          value={script.name || ''}
+          value={script.name}
           onChange={(e) => setScript({ ...script, name: e.target.value })}
           placeholder="Nome do script"
           required
         />
         
-        {parts.map((part, index) => (
-          part.isEditable ? (
-            part.isSelect ? (
-              <Select
-                key={part.id}
-                value={part.value}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-              >
-                {part.options?.map((option, i) => (
-                  <option key={i} value={option}>{option}</option>
-                ))}
-              </Select>
+        <ScriptContent>
+          {parts.map((part, index) => (
+            part.isEditable ? (
+              part.isSelect ? (
+                <Select
+                  key={part.id}
+                  value={part.value}
+                  onChange={(e) => handleInputChange(index, e.target.value)}
+                >
+                  {part.options?.map((option, i) => (
+                    <option key={i} value={option}>{option}</option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  key={part.id}
+                  type="text"
+                  value={part.value}
+                  onChange={(e) => handleInputChange(index, e.target.value)}
+                />
+              )
             ) : (
-              <Input
-                key={part.id}
-                type="text"
-                value={part.value}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-              />
+              <span key={part.id}>{part.value}</span>
             )
-          ) : (
-            <span key={part.id}>{part.value}</span>
-          )
-        ))}
+          ))}
+        </ScriptContent>
         
-        <Button type="submit">Salvar Alterações</Button>
+        <Button type="submit" disabled={isLoading}>
+          {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+        </Button>
       </Form>
       <Popup visible={message !== ''}>{message}</Popup>
     </Container>
